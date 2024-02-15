@@ -11,7 +11,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 # Optional: add contact me email functionality (Day 60)
-# import smtplib
+import smtplib
 import os
 
 '''
@@ -276,7 +276,24 @@ def about():
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html", current_user=current_user)
+    if request.method == "POST":
+        data = request.form
+        print(data["name"])
+        print(data["email"])
+        print(data["phone"])
+        print(data["message"])
+        connection = smtplib.SMTP("smtp.gmail.com", port=587)
+        connection.starttls()
+        connection.login(user=os.environ.get('EMAIL'), password=os.environ.get('PASSWORD'))
+        connection.sendmail(
+            from_addr=os.environ.get('EMAIL'),
+            to_addrs="ambujse@yahoo.com",
+            msg=f"Subject:Contact Me Mail!\n\n Name: {data['name']}.\n Email: {data['email']}.\n Phone: {data['phone']}. "
+                f"\n Message: {data['message']}."
+        )
+        return render_template("contact.html", msg_sent=True)
+    return render_template("contact.html", msg_sent=False)
+
 
 # Optional: You can include the email sending code from Day 60:
 # DON'T put your email and password here directly! The code will be visible when you upload to Github.
